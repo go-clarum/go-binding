@@ -1,4 +1,4 @@
-package client
+package server
 
 import (
 	"context"
@@ -7,11 +7,11 @@ import (
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 	"github.com/go-clarum/go-binding/core/strings"
 	"github.com/go-clarum/go-binding/endpoints/http/internal/grpc"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/response"
+	"github.com/go-clarum/go-binding/endpoints/http/internal/request"
 	"testing"
 )
 
-// ReceiveActionBuilder used to configure a receive action on a client endpoint without the context of a test
+// ReceiveActionBuilder used to configure a receive action on a server endpoint without the context of a test
 // the method chain will end with the .Message() method which will return an error.
 // The error will be a problem encountered during receiving or a validation error.
 type ReceiveActionBuilder struct {
@@ -19,7 +19,7 @@ type ReceiveActionBuilder struct {
 	payloadType api.PayloadType
 }
 
-// TestReceiveActionBuilder used to configure a receive action on a client endpoint with the context of a test
+// TestReceiveActionBuilder used to configure a receive action on a server endpoint with the context of a test
 // the method chain will end with the .Message() method which will not return anything.
 // Any error encountered during receiving or validating will fail the test by calling t.Error().
 type TestReceiveActionBuilder struct {
@@ -37,24 +37,26 @@ func (builder *ReceiveActionBuilder) Json() *ReceiveActionBuilder {
 	return builder
 }
 
-func (testBuilder *TestReceiveActionBuilder) Response(testRes *response.HttpResponse) {
-	if err := testBuilder.doClientReceiveRequest(testRes); err != nil {
+func (testBuilder *TestReceiveActionBuilder) Request(testReq *request.HttpRequest) {
+	if err := testBuilder.doServerReceiveRequest(testReq); err != nil {
 		testBuilder.test.Error(err)
 	}
 }
 
-func (builder *ReceiveActionBuilder) Response(testRes *response.HttpResponse) error {
-	return builder.doClientReceiveRequest(testRes)
+func (builder *ReceiveActionBuilder) Message(testReq *request.HttpRequest) error {
+	return builder.doServerReceiveRequest(testReq)
 }
 
-func (builder *ReceiveActionBuilder) doClientReceiveRequest(testRes *response.HttpResponse) error {
+func (builder *ReceiveActionBuilder) doServerReceiveRequest(testReq *request.HttpRequest) error {
 	client := grpc.GetClient()
-
-	apiReq := &api.ClientReceiveActionRequest{
+	apiReq := &api.ServerReceiveActionRequest{
 		Name:         "not yet implemented",
-		StatusCode:   int32(testRes.StatusCode),
-		Headers:      testRes.Headers,
-		Payload:      testRes.MessagePayload,
+		Method:       testReq.Method,
+		Path:         testReq.Path,
+		Url:          testReq.Url,
+		QueryParams:  grpc.ParseQueryParams(testReq.QueryParams),
+		Headers:      testReq.Headers,
+		Payload:      testReq.MessagePayload,
 		PayloadType:  builder.payloadType,
 		EndpointName: builder.endpoint.name,
 	}
@@ -62,7 +64,7 @@ func (builder *ReceiveActionBuilder) doClientReceiveRequest(testRes *response.Ht
 	ctx, cancel := context.WithTimeout(context.Background(), coreGrpc.DefaultTimeout)
 	defer cancel()
 
-	res, err := client.ClientReceiveAction(ctx, apiReq)
+	res, err := client.ServerReceiveAction(ctx, apiReq)
 
 	if err != nil {
 		return err

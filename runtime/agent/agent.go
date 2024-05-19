@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -37,45 +37,58 @@ func NewAgentService() AgentService {
 }
 
 func (s *service) Initiate(agentExecutable []byte, fileName string) {
-	agentDir := path.Join(".clarum", "agent")
+	agentDir := filepath.Join(".clarum", "agent")
 	if _, err := os.Stat(agentDir); errors.Is(err, os.ErrNotExist) {
 		if err := os.MkdirAll(agentDir, os.ModePerm); err != nil {
 			s.logger.Fatalf("unable to create agent dir - %s", err)
 		}
 	}
 
-	agentFilePath := path.Join(agentDir, fileName)
+	agentFilePath := filepath.Join(agentDir, fileName)
 	if _, err := os.Stat(agentFilePath); errors.Is(err, os.ErrNotExist) {
 		if err := os.WriteFile(agentFilePath, agentExecutable, 0755); err != nil {
 			s.logger.Fatalf("unable to write agent on disk - %s", err)
 		}
 	}
 
-	s.cmd = exec.Command("./" + agentFilePath)
+	s.cmd = exec.Command(filepath.Join(".", agentFilePath))
 	s.logger.Info("starting clarum-agent")
 	if err := s.cmd.Start(); err != nil {
 		s.logger.Fatalf("unable to start agent - %s", err)
 	}
 	s.logger.Infof("clarum-agent started - pid %d", s.cmd.Process.Pid)
 
-	// TODO: polling is be better than waiting
-	time.Sleep(1 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
 
-	req := &api.StatusRequest{}
-	// TODO: use timeout context
-	res, err := s.client.Status(context.Background(), req)
-	if err != nil {
-		s.logger.Fatalf("unable to reach agent GRPC server - %s", err)
+	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
+
+	timeout := time.After(5 * time.Second)
+	for {
+		select {
+		case <-timeout:
+			s.logger.Fatalf("timeout reached, unable to connect to agent GRPC server")
+		case <-ticker.C:
+			req := &api.StatusRequest{}
+			res, err := s.client.Status(ctx, req)
+			if err == nil {
+				s.logger.Infof("connected to clarum-agent version %s", res.Version)
+				return
+			}
+			s.logger.Warnf("unable to connect to clarum-agent - %s", err)
+		}
 	}
-
-	s.logger.Infof("connected to clarum-agent version %s", res.Version)
 }
 
 func (s *service) Shutdown() {
 	s.logger.Info("shutting down agent")
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	req := &api.ShutdownRequest{}
-	_, err := s.client.Shutdown(context.Background(), req)
+	_, err := s.client.Shutdown(ctx, req)
 
 	if err != nil {
 		s.logger.Errorf("unable to shut down agent - %s", err)

@@ -5,11 +5,13 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
+	"time"
 )
 
 const (
 	defaultAgentPort = "9091"
 	defaultAgentHost = "localhost"
+	DefaultTimeout   = 5 * time.Second
 )
 
 func GetConnection() *grpc.ClientConn {

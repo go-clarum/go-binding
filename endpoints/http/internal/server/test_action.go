@@ -1,10 +1,10 @@
-package client
+package server
 
 import (
 	"testing"
 )
 
-// TestActionBuilder TestSendActionBuilder used to initiate a send or receive action on a client endpoint
+// TestSendActionBuilder used to initiate a send or receive action on a server endpoint
 // with the context of a test
 type TestActionBuilder struct {
 	test     *testing.T

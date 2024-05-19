@@ -1,4 +1,4 @@
-package client
+package server
 
 import (
 	"context"
@@ -14,9 +14,9 @@ type Endpoint struct {
 
 type EndpointBuilder struct {
 	name           string
-	baseUrl        string
-	contentType    string
+	port           int
 	timeoutSeconds int
+	contentType    string
 }
 
 func NewEndpointBuilder() *EndpointBuilder {
@@ -28,13 +28,8 @@ func (builder *EndpointBuilder) Name(name string) *EndpointBuilder {
 	return builder
 }
 
-func (builder *EndpointBuilder) BaseUrl(baseUrl string) *EndpointBuilder {
-	builder.baseUrl = baseUrl
-	return builder
-}
-
-func (builder *EndpointBuilder) ContentType(contentType string) *EndpointBuilder {
-	builder.contentType = contentType
+func (builder *EndpointBuilder) Port(port int) *EndpointBuilder {
+	builder.port = port
 	return builder
 }
 
@@ -43,11 +38,16 @@ func (builder *EndpointBuilder) Timeout(timeoutSeconds int) *EndpointBuilder {
 	return builder
 }
 
+func (builder *EndpointBuilder) ContentType(contentType string) *EndpointBuilder {
+	builder.contentType = contentType
+	return builder
+}
+
 func (builder *EndpointBuilder) Build() *Endpoint {
 	client := grpc.GetClient()
-	apiReq := &api.InitClientRequest{
+	apiReq := &api.InitServerRequest{
 		Name:           builder.name,
-		BaseUrl:        builder.baseUrl,
+		Port:           int32(builder.port),
 		ContentType:    builder.contentType,
 		TimeoutSeconds: int32(builder.timeoutSeconds),
 	}
@@ -55,7 +55,7 @@ func (builder *EndpointBuilder) Build() *Endpoint {
 	ctx, cancel := context.WithTimeout(context.Background(), coreGrpc.DefaultTimeout)
 	defer cancel()
 
-	response, err := client.InitClientEndpoint(ctx, apiReq)
+	response, err := client.InitServerEndpoint(ctx, apiReq)
 	if err != nil {
 		logging.Fatalf("connection to agent failed - %s", err)
 	}

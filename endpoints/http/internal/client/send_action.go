@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	api "github.com/go-clarum/go-binding/agent/api/http"
+	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 	"github.com/go-clarum/go-binding/core/strings"
 	"github.com/go-clarum/go-binding/endpoints/http/internal/grpc"
 	"github.com/go-clarum/go-binding/endpoints/http/internal/request"
@@ -44,14 +45,16 @@ func doClientSendRequest(testReq *request.HttpRequest, endpointName string) erro
 		Url:          testReq.Url,
 		Path:         testReq.Path,
 		Method:       testReq.Method,
-		QueryParams:  parseQueryParams(testReq.QueryParams),
+		QueryParams:  grpc.ParseQueryParams(testReq.QueryParams),
 		Headers:      testReq.Headers,
 		Payload:      testReq.MessagePayload,
 		EndpointName: endpointName,
 	}
 
-	// TODO: timeout context
-	res, err := client.ClientSendAction(context.Background(), apiReq)
+	ctx, cancel := context.WithTimeout(context.Background(), coreGrpc.DefaultTimeout)
+	defer cancel()
+
+	res, err := client.ClientSendAction(ctx, apiReq)
 
 	if err != nil {
 		return err
@@ -61,19 +64,4 @@ func doClientSendRequest(testReq *request.HttpRequest, endpointName string) erro
 	}
 
 	return nil
-}
-
-func parseQueryParams(apiQueryParams map[string][]string) map[string]*api.StringsList {
-	result := make(map[string]*api.StringsList)
-
-	if apiQueryParams != nil {
-		for key, value := range apiQueryParams {
-			newList := &api.StringsList{
-				Values: value,
-			}
-			result[key] = newList
-		}
-	}
-
-	return result
 }

@@ -19,3 +19,18 @@ func GetClient() api.HttpServiceClient {
 func createClient() api.HttpServiceClient {
 	return api.NewHttpServiceClient(coreGrpc.GetConnection())
 }
+
+func ParseQueryParams(apiQueryParams map[string][]string) map[string]*api.StringsList {
+	result := make(map[string]*api.StringsList)
+
+	if apiQueryParams != nil {
+		for key, value := range apiQueryParams {
+			newList := &api.StringsList{
+				Values: value,
+			}
+			result[key] = newList
+		}
+	}
+
+	return result
+}
