@@ -3,13 +3,10 @@ package agent
 import (
 	"context"
 	"errors"
-	"fmt"
 	api "github.com/go-clarum/go-binding/agent/api/agent"
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 	"github.com/go-clarum/go-binding/core/logging"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -29,7 +26,8 @@ type service struct {
 }
 
 func NewAgentService() AgentService {
-	client, conn := getClient()
+	conn := coreGrpc.GetConnection()
+	client := getClient(conn)
 
 	return &service{
 		client: client,
@@ -97,16 +95,6 @@ func (s *service) handleFailedAgentShutdown() {
 	}
 }
 
-func getClient() (api.AgentServiceClient, *grpc.ClientConn) {
-	opts := []grpc.DialOption{
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	}
-
-	address := fmt.Sprintf("%s:%s", coreGrpc.DefaultAgentHost, coreGrpc.DefaultAgentPort)
-	conn, err := grpc.Dial(address, opts...)
-	if err != nil {
-		log.Fatalf("error while calling agent service - %s", err)
-	}
-
-	return api.NewAgentServiceClient(conn), conn
+func getClient(connection *grpc.ClientConn) api.AgentServiceClient {
+	return api.NewAgentServiceClient(connection)
 }
