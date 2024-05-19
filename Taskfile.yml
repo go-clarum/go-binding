@@ -1,0 +1,30 @@
+version: '3'
+
+env:
+  PROJECT: clarum-go-binding
+  VERSION: 1.0.0-snapshot
+
+tasks:
+  version:
+    cmds:
+      - echo $VERSION
+
+  build:
+    cmds:
+      - go build -o ./builds/{{.PROJECT}}-{{.VERSION}}
+
+  agent:copy:
+    cmds:
+      - mkdir -p builds/agent && cp ../agent/builds/clarum-agent-* builds/agent
+
+  # relative path here is only temporary, the API will have to be extracted to its own repo
+  api:generate:
+    cmds:
+      - |
+        protoc --go_out=. --go_opt=paths=source_relative \
+        --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+        api/**/*.proto
+
+  test:
+    cmds:
+      - go test ./...
