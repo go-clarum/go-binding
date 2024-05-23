@@ -3,11 +3,11 @@ package client
 import (
 	"context"
 	"errors"
-	api "github.com/go-clarum/go-binding/agent/api/http"
+	api "github.com/go-clarum/go-binding/api/agent/api/http"
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 	"github.com/go-clarum/go-binding/core/strings"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/grpc"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/response"
+	"github.com/go-clarum/go-binding/http/internal/grpc"
+	"github.com/go-clarum/go-binding/http/response"
 	"testing"
 )
 
@@ -15,6 +15,7 @@ import (
 // the method chain will end with the .Message() method which will return an error.
 // The error will be a problem encountered during receiving or a validation error.
 type ReceiveActionBuilder struct {
+	name        string
 	endpoint    *Endpoint
 	payloadType api.PayloadType
 }
@@ -25,6 +26,16 @@ type ReceiveActionBuilder struct {
 type TestReceiveActionBuilder struct {
 	test *testing.T
 	ReceiveActionBuilder
+}
+
+func (testBuilder *TestReceiveActionBuilder) Name(name string) *TestReceiveActionBuilder {
+	testBuilder.name = name
+	return testBuilder
+}
+
+func (builder *ReceiveActionBuilder) Name(name string) *ReceiveActionBuilder {
+	builder.name = name
+	return builder
 }
 
 func (testBuilder *TestReceiveActionBuilder) Json() *TestReceiveActionBuilder {
@@ -38,20 +49,20 @@ func (builder *ReceiveActionBuilder) Json() *ReceiveActionBuilder {
 }
 
 func (testBuilder *TestReceiveActionBuilder) Response(testRes *response.HttpResponse) {
-	if err := testBuilder.doClientReceiveRequest(testRes); err != nil {
+	if err := testBuilder.doClientReceiveResponse(testRes); err != nil {
 		testBuilder.test.Error(err)
 	}
 }
 
 func (builder *ReceiveActionBuilder) Response(testRes *response.HttpResponse) error {
-	return builder.doClientReceiveRequest(testRes)
+	return builder.doClientReceiveResponse(testRes)
 }
 
-func (builder *ReceiveActionBuilder) doClientReceiveRequest(testRes *response.HttpResponse) error {
+func (builder *ReceiveActionBuilder) doClientReceiveResponse(testRes *response.HttpResponse) error {
 	client := grpc.GetClient()
 
 	apiReq := &api.ClientReceiveActionRequest{
-		Name:         "not yet implemented",
+		Name:         builder.name,
 		StatusCode:   int32(testRes.StatusCode),
 		Headers:      testRes.Headers,
 		Payload:      testRes.MessagePayload,

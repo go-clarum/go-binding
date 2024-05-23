@@ -3,11 +3,11 @@ package client
 import (
 	"context"
 	"errors"
-	api "github.com/go-clarum/go-binding/agent/api/http"
+	api "github.com/go-clarum/go-binding/api/agent/api/http"
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 	"github.com/go-clarum/go-binding/core/strings"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/grpc"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/request"
+	"github.com/go-clarum/go-binding/http/internal/grpc"
+	"github.com/go-clarum/go-binding/http/request"
 	"testing"
 )
 
@@ -15,6 +15,7 @@ import (
 // the method chain will end with the .Message() method which will return an error.
 // The error will be a problem encountered during sending.
 type SendActionBuilder struct {
+	name     string
 	endpoint *Endpoint
 }
 
@@ -26,8 +27,18 @@ type TestSendActionBuilder struct {
 	SendActionBuilder
 }
 
+func (testBuilder *TestSendActionBuilder) Name(name string) *TestSendActionBuilder {
+	testBuilder.name = name
+	return testBuilder
+}
+
+func (builder *SendActionBuilder) Name(name string) *SendActionBuilder {
+	builder.name = name
+	return builder
+}
+
 func (testBuilder *TestSendActionBuilder) Request(testReq *request.HttpRequest) {
-	errorResponse := doClientSendRequest(testReq, testBuilder.endpoint.name)
+	errorResponse := testBuilder.doClientSendRequest(testReq)
 
 	if errorResponse != nil {
 		testBuilder.test.Error(errorResponse)
@@ -35,20 +46,20 @@ func (testBuilder *TestSendActionBuilder) Request(testReq *request.HttpRequest) 
 }
 
 func (builder *SendActionBuilder) Request(testReq *request.HttpRequest) error {
-	return doClientSendRequest(testReq, builder.endpoint.name)
+	return builder.doClientSendRequest(testReq)
 }
 
-func doClientSendRequest(testReq *request.HttpRequest, endpointName string) error {
+func (builder *SendActionBuilder) doClientSendRequest(testReq *request.HttpRequest) error {
 	client := grpc.GetClient()
 	apiReq := &api.ClientSendActionRequest{
-		Name:         "not yet implemented",
+		Name:         builder.name,
 		Url:          testReq.Url,
 		Path:         testReq.Path,
 		Method:       testReq.Method,
 		QueryParams:  grpc.ParseQueryParams(testReq.QueryParams),
 		Headers:      testReq.Headers,
 		Payload:      testReq.MessagePayload,
-		EndpointName: endpointName,
+		EndpointName: builder.endpoint.name,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), coreGrpc.DefaultTimeout)

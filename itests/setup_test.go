@@ -1,13 +1,24 @@
 package itests
 
 import (
-	go_binding "github.com/go-clarum/go-binding"
+	clarum "github.com/go-clarum/go-binding"
 	"os"
 	"testing"
 )
 
+var testClient = clarum.Http().Client().
+	Name("testClient").
+	BaseUrl("http://localhost:8083/myApp").
+	Timeout(2).
+	Build()
+
+var firstTestServer = clarum.Http().Server().
+	Name("firstTestServer").
+	Port(8083).
+	Build()
+
 func TestMain(m *testing.M) {
-	defer go_binding.Shutdown()
+	defer clarum.Shutdown()
 
 	result := m.Run()
 

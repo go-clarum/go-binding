@@ -1,11 +1,12 @@
-package server
+package client
 
 import (
 	"context"
-	api "github.com/go-clarum/go-binding/agent/api/http"
+	api "github.com/go-clarum/go-binding/api/agent/api/http"
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 	"github.com/go-clarum/go-binding/core/logging"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/grpc"
+	"github.com/go-clarum/go-binding/core/strings"
+	"github.com/go-clarum/go-binding/http/internal/grpc"
 )
 
 type Endpoint struct {
@@ -14,9 +15,9 @@ type Endpoint struct {
 
 type EndpointBuilder struct {
 	name           string
-	port           int
-	timeoutSeconds int
+	baseUrl        string
 	contentType    string
+	timeoutSeconds int
 }
 
 func NewEndpointBuilder() *EndpointBuilder {
@@ -28,13 +29,8 @@ func (builder *EndpointBuilder) Name(name string) *EndpointBuilder {
 	return builder
 }
 
-func (builder *EndpointBuilder) Port(port int) *EndpointBuilder {
-	builder.port = port
-	return builder
-}
-
-func (builder *EndpointBuilder) Timeout(timeoutSeconds int) *EndpointBuilder {
-	builder.timeoutSeconds = timeoutSeconds
+func (builder *EndpointBuilder) BaseUrl(baseUrl string) *EndpointBuilder {
+	builder.baseUrl = baseUrl
 	return builder
 }
 
@@ -43,11 +39,16 @@ func (builder *EndpointBuilder) ContentType(contentType string) *EndpointBuilder
 	return builder
 }
 
+func (builder *EndpointBuilder) Timeout(timeoutSeconds int) *EndpointBuilder {
+	builder.timeoutSeconds = timeoutSeconds
+	return builder
+}
+
 func (builder *EndpointBuilder) Build() *Endpoint {
 	client := grpc.GetClient()
-	apiReq := &api.InitServerRequest{
+	apiReq := &api.InitClientRequest{
 		Name:           builder.name,
-		Port:           int32(builder.port),
+		BaseUrl:        builder.baseUrl,
 		ContentType:    builder.contentType,
 		TimeoutSeconds: int32(builder.timeoutSeconds),
 	}
@@ -55,12 +56,12 @@ func (builder *EndpointBuilder) Build() *Endpoint {
 	ctx, cancel := context.WithTimeout(context.Background(), coreGrpc.DefaultTimeout)
 	defer cancel()
 
-	response, err := client.InitServerEndpoint(ctx, apiReq)
+	response, err := client.InitClientEndpoint(ctx, apiReq)
 	if err != nil {
 		logging.Fatalf("connection to agent failed - %s", err)
 	}
 
-	if len(response.Error) != 0 {
+	if strings.IsNotBlank(response.Error) {
 		logging.Errorf("error while creating endpoint - %s", response.Error)
 	}
 

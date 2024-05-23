@@ -1,15 +1,11 @@
 package http
 
 import (
-	"github.com/go-clarum/go-binding/endpoints/http/internal/client"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/server"
+	"github.com/go-clarum/go-binding/http/internal/client"
+	"github.com/go-clarum/go-binding/http/internal/server"
 )
 
 type EndpointBuilder struct {
-}
-
-func Http() *EndpointBuilder {
-	return &EndpointBuilder{}
 }
 
 func (heb *EndpointBuilder) Client() *client.EndpointBuilder {

@@ -1,8 +1,8 @@
 package request
 
 import (
-	"github.com/go-clarum/go-binding/endpoints/http/internal/constants"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/message"
+	"github.com/go-clarum/go-binding/http/internal/constants"
+	"github.com/go-clarum/go-binding/http/internal/message"
 	"net/http"
 	"testing"
 )

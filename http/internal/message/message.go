@@ -1,7 +1,7 @@
 package message
 
 import (
-	"github.com/go-clarum/go-binding/endpoints/http/internal/constants"
+	"github.com/go-clarum/go-binding/http/internal/constants"
 	"maps"
 )
 

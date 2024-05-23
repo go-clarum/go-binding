@@ -1,7 +1,8 @@
 package response
 
 import (
-	"github.com/go-clarum/go-binding/endpoints/http/internal/constants"
+	"github.com/go-clarum/go-binding/http/internal/constants"
+	"github.com/go-clarum/go-binding/http/internal/message"
 	"testing"
 )
 
@@ -11,9 +12,9 @@ func TestBuilder(t *testing.T) {
 		ETag("5555").
 		Payload("batman!")
 
-	expected := Response{
+	expected := HttpResponse{
 		StatusCode: 200,
-		Message: Message{
+		HttpMessage: message.HttpMessage{
 			MessagePayload: "batman!",
 			Headers: map[string]string{
 				constants.ContentTypeHeaderName: "text/plain",

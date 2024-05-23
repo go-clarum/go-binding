@@ -1,7 +1,9 @@
 package grpc
 
 import (
+	"context"
 	"fmt"
+	"github.com/go-clarum/go-binding/core/logging"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
@@ -17,6 +19,7 @@ const (
 func GetConnection() *grpc.ClientConn {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(unaryInterceptor),
 	}
 
 	address := fmt.Sprintf("%s:%s", defaultAgentHost, defaultAgentPort)
@@ -26,4 +29,14 @@ func GetConnection() *grpc.ClientConn {
 	}
 
 	return conn
+}
+
+func unaryInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	start := time.Now()
+	logging.Debugf("executing GRPC method [%s]", method)
+
+	err := invoker(ctx, method, req, reply, cc, opts...)
+
+	logging.Debugf("finished GRPC method [%s], duration [%dms], error [%v]", method, time.Since(start).Milliseconds(), err)
+	return err
 }

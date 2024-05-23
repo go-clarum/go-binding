@@ -3,11 +3,11 @@ package server
 import (
 	"context"
 	"errors"
-	api "github.com/go-clarum/go-binding/agent/api/http"
+	api "github.com/go-clarum/go-binding/api/agent/api/http"
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 	"github.com/go-clarum/go-binding/core/strings"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/grpc"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/response"
+	"github.com/go-clarum/go-binding/http/internal/grpc"
+	"github.com/go-clarum/go-binding/http/response"
 	"testing"
 )
 
@@ -15,6 +15,7 @@ import (
 // the method chain will end with the .Message() method which will return an error.
 // The error will be a problem encountered during sending.
 type SendActionBuilder struct {
+	name     string
 	endpoint *Endpoint
 }
 
@@ -26,21 +27,31 @@ type TestSendActionBuilder struct {
 	SendActionBuilder
 }
 
-func (testBuilder *TestSendActionBuilder) Message(testRes *response.HttpResponse) {
-	if err := testBuilder.doServerSendRequest(testRes); err != nil {
+func (testBuilder *TestSendActionBuilder) Name(name string) *TestSendActionBuilder {
+	testBuilder.name = name
+	return testBuilder
+}
+
+func (builder *SendActionBuilder) Name(name string) *SendActionBuilder {
+	builder.name = name
+	return builder
+}
+
+func (testBuilder *TestSendActionBuilder) Response(testRes *response.HttpResponse) {
+	if err := testBuilder.doServerSendResponse(testRes); err != nil {
 		testBuilder.test.Error(err)
 	}
 }
 
-func (builder *SendActionBuilder) Message(testRes *response.HttpResponse) error {
-	return builder.doServerSendRequest(testRes)
+func (builder *SendActionBuilder) Response(testRes *response.HttpResponse) error {
+	return builder.doServerSendResponse(testRes)
 }
 
-func (builder *SendActionBuilder) doServerSendRequest(testRes *response.HttpResponse) error {
+func (builder *SendActionBuilder) doServerSendResponse(testRes *response.HttpResponse) error {
 	client := grpc.GetClient()
 
 	apiReq := &api.ServerSendActionRequest{
-		Name:         "not yet implemented",
+		Name:         builder.name,
 		StatusCode:   int32(testRes.StatusCode),
 		Headers:      testRes.Headers,
 		Payload:      testRes.MessagePayload,

@@ -3,7 +3,7 @@ package agent
 import (
 	"context"
 	"errors"
-	api "github.com/go-clarum/go-binding/agent/api/agent"
+	api "github.com/go-clarum/go-binding/api/agent/api/agent"
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 	"github.com/go-clarum/go-binding/core/logging"
 	"google.golang.org/grpc"
@@ -44,6 +44,8 @@ func (s *service) Initiate(agentExecutable []byte, fileName string) {
 		}
 	}
 
+	//TODO: generate hash of executable to know when to replace it
+	//  right now we have a problem that the agent executable does not get updated
 	agentFilePath := filepath.Join(agentDir, fileName)
 	if _, err := os.Stat(agentFilePath); errors.Is(err, os.ErrNotExist) {
 		if err := os.WriteFile(agentFilePath, agentExecutable, 0755); err != nil {

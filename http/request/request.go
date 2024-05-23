@@ -2,7 +2,7 @@ package request
 
 import (
 	"fmt"
-	"github.com/go-clarum/go-binding/endpoints/http/internal/message"
+	"github.com/go-clarum/go-binding/http/internal/message"
 	"maps"
 	"net/http"
 	"reflect"
