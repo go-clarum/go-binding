@@ -18,9 +18,6 @@ var firstTestServer = clarum.Http().Server().
 	Build()
 
 func TestMain(m *testing.M) {
-	defer clarum.Shutdown()
-
 	result := m.Run()
-
 	os.Exit(result)
 }

@@ -2,27 +2,26 @@ package go_binding
 
 import (
 	_ "embed"
-	"github.com/go-clarum/go-binding/core/logging"
+	"github.com/go-clarum/go-binding/agent"
 	clarumHttp "github.com/go-clarum/go-binding/http"
-	"github.com/go-clarum/go-binding/runtime/agent"
 )
 
-//go:embed builds/agent/clarum-agent-1.0.0-snapshot
-var agentExecutable []byte
 var agentService agent.AgentService
 
 func init() {
 	agentService = agent.NewAgentService()
 
-	// when testing the agent from your IDE, just comment this line
-	agentService.Initiate(agentExecutable, "clarum-agent-1.0.0-snapshot")
+	// while developing you can comment this line and start the agent separately
+	//agentService.Initiate()
 }
 
 func Http() *clarumHttp.EndpointBuilder {
 	return &clarumHttp.EndpointBuilder{}
 }
 
+// Shutdown signals the agent that it should stop running. At the moment this does not seem to be required because the
+// spawned process is coupled with the one running the tests -> the agent is stopped when the tests stop.
+// In the future though, when we implement agent keep alive, we will need this.
 func Shutdown() {
-	logging.Info("sending shutdown signal to agent")
 	agentService.Shutdown()
 }

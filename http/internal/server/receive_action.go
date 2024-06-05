@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"errors"
-	api "github.com/go-clarum/go-binding/api/agent/api/http"
+	api "github.com/go-clarum/go-binding/api/http"
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 	"github.com/go-clarum/go-binding/core/strings"
 	"github.com/go-clarum/go-binding/http/internal/grpc"

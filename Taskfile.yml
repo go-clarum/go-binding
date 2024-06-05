@@ -3,6 +3,7 @@ version: '3'
 env:
   PROJECT: clarum-go-binding
   VERSION: 1.0.0-snapshot
+  AGENT_API_PATH: agent/api
 
 tasks:
   version:
@@ -11,32 +12,21 @@ tasks:
 
   build:
     cmds:
-      - go build -o ./builds/{{.PROJECT}}-{{.VERSION}}
+      - go build
 
-  agent:generate:
-    deps: [ agent:build ]
-    cmds:
-      - mkdir -p builds/agent && cp agent/builds/clarum-agent-* builds/agent
-
-  agent:update:
-    cmds:
-      - git submodule update --remote --merge
-
-  agent:build:
-    cmds:
-      - cd agent && task build
-
-  api:generate:
+  api:copy:
     deps: [ api:clean ]
     cmds:
       - |
-        mkdir -p api && protoc --go_out=api --go_opt=paths=source_relative \
-        --go-grpc_out=api --go-grpc_opt=paths=source_relative \
-        agent/api/**/*.proto
+        cp ../{{.AGENT_API_PATH}}/agent/*.go {{.AGENT_API_PATH}}/agent \
+        && cp ../{{.AGENT_API_PATH}}/http/*.go {{.AGENT_API_PATH}}/http \
+        && cp ../{{.AGENT_API_PATH}}/cmd/*.go {{.AGENT_API_PATH}}/cmd 
 
   api:clean:
     cmds:
-      - rm -rf api
+      - |
+        rm -rf {{.AGENT_API_PATH}} \
+        && mkdir -p {{.AGENT_API_PATH}}/agent {{.AGENT_API_PATH}}/http/ {{.AGENT_API_PATH}}/cmd
 
   test:
     cmds:

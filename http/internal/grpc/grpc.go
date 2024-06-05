@@ -1,7 +1,7 @@
 package grpc
 
 import (
-	api "github.com/go-clarum/go-binding/api/agent/api/http"
+	api "github.com/go-clarum/go-binding/api/http"
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 )
 
