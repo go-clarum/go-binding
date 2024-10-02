@@ -24,42 +24,40 @@ func TestGet(t *testing.T) {
 		Response(Response(http.StatusOK))
 }
 
-/*
 // Method HEAD
 // + URL overwrite
 func TestHead(t *testing.T) {
 	testClient.In(t).Send().
-		Message(message.Head("myOtherApp").
-			BaseUrl("http://localhost:8084"))
+		Request(Head("myOtherApp").BaseUrl("http://localhost:8084"))
 
 	secondTestServer.In(t).Receive().
-		Message(message.Head("myOtherApp").BaseUrl("has no effect on server"))
+		Request(Head("myOtherApp").BaseUrl("has no effect on server"))
 	secondTestServer.In(t).Send().
-		Message(message.Response(http.StatusOK))
+		Response(Response(http.StatusOK))
 
 	testClient.In(t).Receive().
-		Message(message.Response(http.StatusOK))
+		Response(Response(http.StatusOK))
 }
 
 // Method POST
 // + multiple query params
 func TestPost(t *testing.T) {
 	testClient.In(t).Send().
-		Message(message.Post().
+		Request(Post().
 			QueryParam("myParam1", "myValue1").
 			QueryParam("myParam2", "myValue1").
 			Payload("my plain text payload"))
 
 	firstTestServer.In(t).Receive().
-		Message(message.Post("myApp").
+		Request(Post("myApp").
 			QueryParam("myParam1", "myValue1").
 			QueryParam("myParam2", "myValue1").
 			Payload("my plain text payload"))
 	firstTestServer.In(t).Send().
-		Message(message.Response(http.StatusOK))
+		Response(Response(http.StatusOK))
 
 	testClient.In(t).Receive().
-		Message(message.Response(http.StatusOK))
+		Response(Response(http.StatusOK))
 }
 
 // Method PUT
@@ -68,21 +66,21 @@ func TestPost(t *testing.T) {
 // + request payload validation
 func TestPut(t *testing.T) {
 	testClient.In(t).Send().
-		Message(message.Put().
+		Request(Put().
 			QueryParam("myParam1", "myValue1", "myValue2").
 			Authorization("1234").
 			Payload("my plain text payload"))
 
 	firstTestServer.In(t).Receive().
-		Message(message.Put("myApp").
+		Request(Put("myApp").
 			QueryParam("myParam1", "myValue1").
 			Authorization("1234").
 			Payload("my plain text payload"))
 	firstTestServer.In(t).Send().
-		Message(message.Response(http.StatusCreated))
+		Response(Response(http.StatusCreated))
 
 	testClient.In(t).Receive().
-		Message(message.Response(http.StatusCreated))
+		Response(Response(http.StatusCreated))
 }
 
 // Method DELETE
@@ -91,17 +89,17 @@ func TestPut(t *testing.T) {
 // + server ignores request payload
 func TestDelete(t *testing.T) {
 	testClient.In(t).Send().
-		Message(message.Delete("my", "/", "resource", "", "1234").
+		Request(Delete("my", "/", "resource", "", "1234").
 			Authorization("some token which is ignored on server validation").
 			Payload("payload which will be ignored"))
 
 	firstTestServer.In(t).Receive().
-		Message(message.Delete("myApp/my/resource/1234"))
+		Request(Delete("myApp/my/resource/1234"))
 	firstTestServer.In(t).Send().
-		Message(message.Response(http.StatusOK))
+		Response(Response(http.StatusOK))
 
 	testClient.In(t).Receive().
-		Message(message.Response(http.StatusOK))
+		Response(Response(http.StatusOK))
 }
 
 // Method OPTIONS
@@ -110,21 +108,21 @@ func TestDelete(t *testing.T) {
 // + client ignores response payload
 func TestOptions(t *testing.T) {
 	testClient.In(t).Send().
-		Message(message.Options().
+		Request(Options().
 			Header("trace", "231561234234").
 			Header("span", "33334444"))
 
 	firstTestServer.In(t).Receive().
-		Message(message.Options("myApp").
+		Request(Options("myApp").
 			Header("trace", "231561234234").
 			Header("span", "33334444"))
 	firstTestServer.In(t).Send().
-		Message(message.Response(http.StatusOK).
+		Response(Response(http.StatusOK).
 			ETag("555777666").
 			Payload("payload which will be ignored"))
 
 	testClient.In(t).Receive().
-		Message(message.Response(http.StatusOK).
+		Response(Response(http.StatusOK).
 			ETag("555777666"))
 }
 
@@ -132,30 +130,29 @@ func TestOptions(t *testing.T) {
 // + response payload validation
 func TestTrace(t *testing.T) {
 	testClient.In(t).Send().
-		Message(message.Trace())
+		Request(Trace())
 
 	firstTestServer.In(t).Receive().
-		Message(message.Trace("myApp"))
+		Request(Trace("myApp"))
 	firstTestServer.In(t).Send().
-		Message(message.Response(http.StatusOK).
+		Response(Response(http.StatusOK).
 			Payload("my special response"))
 
 	testClient.In(t).Receive().
-		Message(message.Response(http.StatusOK).
+		Response(Response(http.StatusOK).
 			Payload("my special response"))
 }
 
 // Method PATCH
 func TestPatch(t *testing.T) {
 	testClient.In(t).Send().
-		Message(message.Patch())
+		Request(Patch())
 
 	firstTestServer.In(t).Receive().
-		Message(message.Patch("myApp"))
+		Request(Patch("myApp"))
 	firstTestServer.In(t).Send().
-		Message(message.Response(http.StatusOK))
+		Response(Response(http.StatusOK))
 
 	testClient.In(t).Receive().
-		Message(message.Response(http.StatusOK))
+		Response(Response(http.StatusOK))
 }
-*/

@@ -3,7 +3,7 @@ version: '3'
 env:
   PROJECT: clarum-go-binding
   VERSION: 1.0.0-snapshot
-  AGENT_API_PATH: agent/api
+  AGENT_API_PATH: api
 
 tasks:
   version:
@@ -18,9 +18,9 @@ tasks:
     deps: [ api:clean ]
     cmds:
       - |
-        cp ../{{.AGENT_API_PATH}}/agent/*.go {{.AGENT_API_PATH}}/agent \
-        && cp ../{{.AGENT_API_PATH}}/http/*.go {{.AGENT_API_PATH}}/http \
-        && cp ../{{.AGENT_API_PATH}}/cmd/*.go {{.AGENT_API_PATH}}/cmd 
+        cp ../agent/api/agent/*.go {{.AGENT_API_PATH}}/agent \
+        && cp ../agent/api/http/*.go {{.AGENT_API_PATH}}/http \
+        && cp ../agent/api/cmd/*.go {{.AGENT_API_PATH}}/cmd 
 
   api:clean:
     cmds:

@@ -12,7 +12,9 @@ func init() {
 	agentService = agent.NewAgentService()
 
 	// while developing you can comment this line and start the agent separately
-	//agentService.Initiate()
+	agentService.Initiate()
+
+	agentService.Logs()
 }
 
 func Http() *clarumHttp.EndpointBuilder {

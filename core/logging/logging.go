@@ -132,6 +132,10 @@ func Fatalf(format string, a ...any) {
 	defaultLogger.Fatalf(format, a...)
 }
 
+func Log(message string) {
+	internalLogger.Println(message)
+}
+
 func parseLevel(level string) slog.Level {
 	lcLevel := strings.ToLower(level)
 	var result slog.Level

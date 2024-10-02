@@ -17,6 +17,11 @@ var firstTestServer = clarum.Http().Server().
 	Port(8083).
 	Build()
 
+var secondTestServer = clarum.Http().Server().
+	Name("secondTestServer").
+	Port(8084).
+	Build()
+
 func TestMain(m *testing.M) {
 	result := m.Run()
 	os.Exit(result)
