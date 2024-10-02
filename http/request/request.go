@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"reflect"
 	"slices"
+	"strings"
 )
 
 type HttpRequest struct {
@@ -133,7 +134,7 @@ func (request *HttpRequest) Equals(other *HttpRequest) bool {
 		return false
 	} else if request.Url != other.Url {
 		return false
-	} else if !slices.Equal(request.Path, other.Path) {
+	} else if strings.Join(request.Path, "/") != strings.Join(other.Path, "/") {
 		return false
 	} else if !maps.Equal(request.Headers, other.Headers) {
 		return false

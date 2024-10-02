@@ -28,6 +28,10 @@ tasks:
         rm -rf {{.AGENT_API_PATH}} \
         && mkdir -p {{.AGENT_API_PATH}}/agent {{.AGENT_API_PATH}}/http/ {{.AGENT_API_PATH}}/cmd
 
-  test:
+  test:unit:
     cmds:
-      - go test ./...
+      - go test $(go list ./... | grep -v /itests)
+
+  test:it:
+    cmds:
+      - go test -v ./itests/...
