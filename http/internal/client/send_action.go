@@ -50,6 +50,10 @@ func (builder *SendActionBuilder) Request(testReq *request.HttpRequest) error {
 }
 
 func (builder *SendActionBuilder) doClientSendRequest(testReq *request.HttpRequest) error {
+	if testReq == nil {
+		return errors.New("request to send cannot be nil")
+	}
+
 	client := grpc.GetClient()
 	apiReq := &api.ClientSendActionRequest{
 		Name:         builder.name,

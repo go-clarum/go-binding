@@ -48,6 +48,10 @@ func (builder *SendActionBuilder) Response(testRes *response.HttpResponse) error
 }
 
 func (builder *SendActionBuilder) doServerSendResponse(testRes *response.HttpResponse) error {
+	if testRes == nil {
+		return errors.New("response to send cannot be nil")
+	}
+
 	client := grpc.GetClient()
 
 	apiReq := &api.ServerSendActionRequest{

@@ -59,6 +59,10 @@ func (builder *ReceiveActionBuilder) Request(testReq *request.HttpRequest) error
 }
 
 func (builder *ReceiveActionBuilder) doServerReceiveRequest(testReq *request.HttpRequest) error {
+	if testReq == nil {
+		return errors.New("request to receive cannot be nil")
+	}
+
 	client := grpc.GetClient()
 	apiReq := &api.ServerReceiveActionRequest{
 		Name:         builder.name,
