@@ -5,10 +5,10 @@ import (
 	coreGrpc "github.com/go-clarum/go-binding/core/grpc"
 )
 
-var client api.HttpServiceClient
+var client api.HttpApiClient
 
 // initiate client on demand
-func GetClient() api.HttpServiceClient {
+func GetClient() api.HttpApiClient {
 	if client == nil {
 		client = createClient()
 	}
@@ -16,8 +16,8 @@ func GetClient() api.HttpServiceClient {
 	return client
 }
 
-func createClient() api.HttpServiceClient {
-	return api.NewHttpServiceClient(coreGrpc.GetConnection())
+func createClient() api.HttpApiClient {
+	return api.NewHttpApiClient(coreGrpc.GetConnection())
 }
 
 func ParseQueryParams(apiQueryParams map[string][]string) map[string]*api.StringsList {
